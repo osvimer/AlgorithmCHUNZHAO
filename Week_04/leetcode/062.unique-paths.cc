@@ -5,6 +5,9 @@
 // https://leetcode-cn.com/problems/unique-paths
 
 // 思路一：动态规划
+// 重复子问题：从左上角到 (i, j) 处的不同路径
+// 状态空间：dp[i][j] 表示从 (0, 0) 到 （i, j）的路径数
+// 状态转移方程: dp[i][j] = dp[i-1][j] + dp[i][j-1];
 class Solution {
 public:
     int uniquePaths(int m, int n) {

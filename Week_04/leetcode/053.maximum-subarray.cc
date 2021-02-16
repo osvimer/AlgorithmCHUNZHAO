@@ -7,7 +7,9 @@
 //    解释：连续子数组 [4,-1,2,1] 的和最大，为 6 。
 // https://leetcode-cn.com/problems/maximum-subarray
 
-// 思路一
+// 思路一: 当前和大于零就继续累加
+//         当前和小于零就重新累加
+//         不断更新字序和的最大值
 class Solution {
 public:
     int maxSubArray(vector<int>& nums) {
@@ -24,7 +26,10 @@ public:
     }
 };
 
-// 思路二
+// 思路二: 动态规划
+// dp[i] 表示以第 i 个数结尾的最大连续子序列之和
+// 状态转移方程: dp[i] = max(dp[i-1], 0) + nums[i];
+// 解决原始问题：result = dp 数组中的最大值
 class Solution {
 public:
     int maxSubArray(vector<int>& nums) {

@@ -60,6 +60,39 @@ private:
 
 
 // 思路二：动态规划
+// 重复子问题：dp[i] 为 s[0..i] 的译码总数。
+// 状态转移方程：
+// 1. 若 s[i] 为 '0', 若 s[i-1] 为 '1' 或者 '2'; 则 dp[i] = dp[i-2]; 否则 return 0
+//    解释：s[i-1] 和 s[i] 结合一起被唯一译码，不增加情况
+// 2. 若 s[i-1] 为 '1', 则 dp[i] = dp[i-1] + dp[i-2];
+//    解释：s[i-1] 与 s[i] 分开译码，则为 s[i-1]; 合并译码，则为 s[i-2];
+// 3. 若 s[i-1] 为 '2' 且 '1' <= s[i] <= '6'; 则 dp[i] = dp[i-1] + dp[i-2];
+// 4. 其他情况，s[i] = s[i-1]
+class Solution {
+public:
+    int numDecodings(string s) {
+        if (s.empty() || s[0] == '0') return 0;
+        vector<int> dp(s.size() + 1);
+        dp[0] = 1;  // s[-1]
+        dp[1] = 1;  // s[0]
+        for (int i = 1; i < s.size(); ++i) {
+            if ('0' == s[i]) {
+                if ('1' == s[i-1] || '2' == s[i-1]) {
+                    dp[i+1] = dp[i-1];
+                } else {
+                    return 0;
+                }
+            } else if ('1' == s[i-1] || ('2' == s[i-1] && '1' <= s[i] && s[i] <= '6')) {
+                dp[i+1] = dp[i-1] + dp[i];
+            } else {
+                dp[i+1] = dp[i];
+            }
+        }
+        return dp[s.size()];
+    }
+};
+
+// 进一步优化时间复杂度
 class Solution {
 public:
     int numDecodings(string s) {
