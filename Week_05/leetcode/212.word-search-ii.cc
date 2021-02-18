@@ -1,11 +1,9 @@
-#include <iostream>
-#include <map>
-#include <set>
-#include <vector>
-#include <string>
+// 给定一个 m x n 二维字符网格 board 和一个单词（字符串）列表 words，找出所有同时在二维网格和字典中出现的单词。
+// 单词必须按照字母顺序，通过 相邻的单元格 内的字母构成，其中“相邻”单元格是那些水平相邻或垂直相邻的单元格。
+// 同一个单元格内的字母在一个单词中不允许被重复使用。
+// 链接：https://leetcode-cn.com/problems/word-search-ii
 
-using namespace std;
-
+// 思路一：字典树 + DFS
 class Solution {
     class Trie {
         struct TrieNode {
@@ -102,12 +100,67 @@ private:
     shared_ptr<Trie> trie;
 };
 
-int main(int argc, const char* argv[]) {
-    vector<vector<char>> board = {{'a', 'b'}, {'c', 'd'}};
-    vector<string> words = {"abc", "bdc"};
-    Solution s;
-    vector<string> result = s.findWords(board, words);
-    for (auto& str : result) {
-        cout << str << endl;
+// 进一步优化
+// 1. 去掉 visited 数组, 改用 board 数组原地标记
+// 2. 将 dfs 每次传递的 string 换成 Tire 树的结点指针
+class Solution {
+    struct TrieNode {
+        string word;
+        map<char, TrieNode*> child_table;
+        TrieNode() {}
+    };
+public:
+    vector<string> findWords(vector<vector<char>>& board, vector<string>& words) {
+        if (words.empty() || board.empty() || board[0].empty()) return result;
+        rows = board.size();
+        cols = board[0].size();
+
+        TrieNode* root = new TrieNode();
+        for (string& word : words) {
+            TrieNode* cur = root;
+            for (const char& c : word) {
+                if (0 == cur->child_table.count(c)) {
+                    cur->child_table[c] = new TrieNode();
+                }
+                cur = cur->child_table[c];
+            }
+            cur->word = word;
+        }
+
+        for (int i = 0; i < rows; ++i) {
+            for (int j = 0; j < cols; ++j) {
+                dfs(board, i, j, root);
+            }
+        }
+        for (const string& w : found_words) {
+            result.push_back(w);
+        }
+        return result;
     }
-}
+    void dfs(vector<vector<char>>& board, int i, int j, TrieNode* root) {
+        char target = board[i][j];
+        if (!root || 0 == root->child_table.count(target)) return;
+        root = root->child_table[target];
+        if (!root->word.empty()) {
+            found_words.insert(root->word);
+        }
+        board[i][j] = '.';
+        for (int k = 0; k < 4; ++k) {
+            int x = i + direct[k][0];
+            int y = j + direct[k][1];
+            if (inBound(x, y) && '.' != board[x][y]) {
+                dfs(board, x, y, root);
+            }
+        }
+        board[i][j] = target;
+    }
+    bool inBound(int i, int j) {
+        return 0 <= i && i < rows && 0 <= j && j < cols;
+    }
+private:
+    int rows;
+    int cols;
+    vector<string> result;
+    unordered_set<string> found_words;
+    int direct[4][2] = {{-1, 0}, {0, -1}, {1, 0}, {0, 1}};
+};
