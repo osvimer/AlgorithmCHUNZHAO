@@ -5,7 +5,7 @@
 //     trie.search("apple");   // 返回 true
 //     trie.search("app");     // 返回 false
 //     trie.startsWith("app"); // 返回 true
-//     trie.insert("app");   
+//     trie.insert("app");
 //     trie.search("app");     // 返回 true
 // 说明:
 //     你可以假设所有的输入都是由小写字母 a - z 构成的。
@@ -17,7 +17,7 @@ public:
     Trie() {
         root = new TrieNode();
     }
-    
+
     /** Inserts a word into the trie. */
     void insert(string word) {
         TrieNode* cur = root;
@@ -29,12 +29,12 @@ public:
         }
         cur->end = true;
     }
-    
+
     /** Returns if the word is in the trie. */
     bool search(string word) {
         return find(word, true);
     }
-    
+
     /** Returns if there is any word in the trie that starts with the given prefix. */
     bool startsWith(string prefix) {
         return find(prefix, false);
@@ -61,10 +61,53 @@ private:
     TrieNode* root;
 };
 
-/**
- * Your Trie object will be instantiated and called as such:
- * Trie* obj = new Trie();
- * obj->insert(word);
- * bool param_2 = obj->search(word);
- * bool param_3 = obj->startsWith(prefix);
- */
+// 改进版本，使用智能指针, 避免内存泄漏。
+class Trie {
+public:
+    /** Initialize your data structure here. */
+    Trie() {
+        root.reset(new TrieNode());
+    }
+
+    /** Inserts a word into the trie. */
+    void insert(string word) {
+        shared_ptr<TrieNode> cur = root;
+        for (char& c : word) {
+            if (0 == cur->child_table.count(c)) {
+                cur->child_table[c] = make_shared<TrieNode>();
+            }
+            cur = cur->child_table[c];
+        }
+        cur->end = true;
+    }
+
+    /** Returns if the word is in the trie. */
+    bool search(string word) {
+        return find(word, true);
+    }
+
+    /** Returns if there is any word in the trie that starts with the given prefix. */
+    bool startsWith(string prefix) {
+        return find(prefix, false);
+    }
+private:
+    bool find(string& word, bool strict) {
+        shared_ptr<TrieNode> cur = root;
+        for (char& c: word) {
+            if (0 == cur->child_table.count(c)) {
+                return false;
+            }
+            cur = cur->child_table[c];
+        }
+
+        return strict ? cur->end : true;
+    }
+
+    struct TrieNode {
+        bool end;
+        map<char, shared_ptr<TrieNode>> child_table;
+        TrieNode(): end(false) {}
+    };
+
+    shared_ptr<TrieNode> root;
+};
